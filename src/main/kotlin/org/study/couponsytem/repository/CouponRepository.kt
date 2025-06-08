@@ -6,7 +6,7 @@ import org.study.couponsytem.entity.Coupon
 
 
 @Repository
-interface CouponIssueRepository : JpaRepository<Coupon, Long> {
+interface CouponRepository : JpaRepository<Coupon, Long> {
 
     // 🔍 쿠폰 키로 조회
     fun findByCouponKey(couponKey: String): Coupon?

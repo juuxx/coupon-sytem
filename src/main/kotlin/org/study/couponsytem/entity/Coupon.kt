@@ -13,6 +13,10 @@ data class Coupon(
     @Column(name = "coupon_key", nullable = false, unique = true)
     val couponKey: String,
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "group_id")
+    val group: CouponGroup,
+
     @Column(name = "user_id")
     var userId: Long? = null,
 

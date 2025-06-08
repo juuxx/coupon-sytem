@@ -1,0 +1,44 @@
+spring:
+  application:
+    name: ranking-system
+  datasource:
+    url: jdbc:mysql://localhost:3306/insight?allowPublicKeyRetrieval=true&useSSL=false
+    username: root
+    password: 1234
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: 300   # ? ?? ??: ?? 300 ??? ? ??
+      minimum-idle: 10         # ?? 10? ??
+      idle-timeout: 300000     # 5? (ms)
+      max-lifetime: 1800000    # 30? (ms)
+      connection-timeout: 30000 # 30? (ms)
+
+  jpa:
+    hibernate:
+      ddl-auto: update  # ??? ??? validate ?? none ??
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+  jackson:
+    serialization:
+      WRITE_DATES_AS_TIMESTAMPS: false
+  data:
+    redis:
+      host: localhost
+      port: 6379
+  kafka:
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+server:
+  port: 8080
+
+logging:
+  level:
+    root: INFO  # ??? INFO
+    org.study.rankingsystem: DEBUG  # ?? ???? ??? ??
+    org.study.rankingsystem.infra.redis.service: DEBUG  # Redis ?? ???
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
