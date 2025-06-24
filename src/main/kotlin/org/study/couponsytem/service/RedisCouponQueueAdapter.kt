@@ -12,7 +12,7 @@ class RedisCouponQueueAdapter(
         val key = "couponQueue:$eventId"
         redis.executePipelined {
             val ops = redis.opsForList()
-            coupons.forEach { c -> ops.rightPush(key, "${c.couponKey}:${c.discountAmount}") }
+            coupons.forEach { c -> ops.rightPush(key, "${c.couponKey}:${c.discountType}:${c.discountAmount}") }
             null
         }
     }

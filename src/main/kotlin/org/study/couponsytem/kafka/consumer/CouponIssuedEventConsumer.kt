@@ -28,9 +28,6 @@ class CouponIssuedEventConsumer(
             val coupon = couponRepository.findByCouponKey(event.couponKey)
                 ?: throw IllegalArgumentException("존재하지 않는 쿠폰: ${event.couponKey}")
 
-            val couponPolicyDetail = couponPolicyDetailRepository.findByCouponGroup_IdAndDiscountValue(coupon.group.id, event.discountRate)
-                ?: throw IllegalArgumentException("존재하지 않는 쿠폰 정책: ${event.couponKey}")
-
             val user = userRepository.findByUserId(event.userId)
                 ?: run {
                     log.warn("존재하지 않는 userId: ${event.userId}")
@@ -41,8 +38,8 @@ class CouponIssuedEventConsumer(
 
             coupon.issued = true
             coupon.userId = userId  // userId가 Long 이면
-            coupon.discountType = couponPolicyDetail.discountType
-            coupon.discountAmount = event.discountRate
+            coupon.discountType = event.discountType
+            coupon.discountAmount = event.discountValue
 
             couponRepository.save(coupon)
 

@@ -7,10 +7,10 @@ import org.springframework.data.redis.core.script.DefaultRedisScript
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.scripting.support.ResourceScriptSource
 import org.springframework.stereotype.Service
+import org.study.couponsytem.entity.DiscountType
 import org.study.couponsytem.kafka.event.CouponIssuedEvent
 import org.study.couponsytem.request.CouponIssueRequest
 import org.study.couponsytem.request.CouponIssueResponse
-import java.time.LocalDateTime
 
 @Service
 class CouponIssueService(
@@ -28,7 +28,7 @@ class CouponIssueService(
     fun issue(request: CouponIssueRequest): CouponIssueResponse {
         val eventId = request.eventId
         val userId = request.userId
-        val redisQueueKey = "couponPool:$eventId"
+        val redisQueueKey = "couponQueue:$eventId"
         val redisIssuedKey = "coupon:issued:$eventId"
 
         val result = redisTemplate.execute(
@@ -45,15 +45,29 @@ class CouponIssueService(
                 // ──────────────────────────
                 // 1) "couponKey:50" → 파싱
                 // ──────────────────────────
-                val (couponKey, discountStr) = result.split(":")
-                val discountRate = discountStr.toInt()
+//                val (couponKey, discountStr, discountType) = result.split(":")
+//                val discountValue = discountStr.toInt()
+//
+//                // 2) Kafka 발행
+//                val event = CouponIssuedEvent(eventId, userId, couponKey, discountValue)
+//                kafkaTemplate.send("coupon-issued", eventId, event)
+//
+//                // 3) 사용자 메시지
+//                val message = "${discountValue}% 할인 쿠폰이 발급되었습니다."
 
-                // 2) Kafka 발행
-                val event = CouponIssuedEvent(eventId, userId, couponKey, discountRate)
+                val (couponKey, typeStr, discountStr) = result.split(":")
+                val discountValue = discountStr.toInt()
+                val discountType = DiscountType.valueOf(typeStr.uppercase())  // enum DiscountType.PERCENT, AMOUNT 등
+
+                // Kafka 이벤트 발행
+                val event = CouponIssuedEvent(eventId, userId, couponKey, discountValue, discountType)
                 kafkaTemplate.send("coupon-issued", eventId, event)
 
-                // 3) 사용자 메시지
-                val message = "${discountRate}% 할인 쿠폰이 발급되었습니다."
+                // 사용자 메시지 구성
+                val message = when (discountType) {
+                    DiscountType.PERCENT -> "${discountValue}% 할인 쿠폰이 발급되었습니다."
+                    DiscountType.AMOUNT -> "${discountValue}원 할인 쿠폰이 발급되었습니다."
+                }
 
                 CouponIssueResponse(true, null, couponKey, message)
             }
