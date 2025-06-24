@@ -42,18 +42,6 @@ class CouponIssueService(
             "SOLD_OUT" -> CouponIssueResponse(false, "SOLD_OUT", null, "쿠폰이 모두 소진되었습니다.")
             null -> CouponIssueResponse(false, "ERROR", null, "쿠폰 발급 중 오류가 발생했습니다.")
             else -> {
-                // ──────────────────────────
-                // 1) "couponKey:50" → 파싱
-                // ──────────────────────────
-//                val (couponKey, discountStr, discountType) = result.split(":")
-//                val discountValue = discountStr.toInt()
-//
-//                // 2) Kafka 발행
-//                val event = CouponIssuedEvent(eventId, userId, couponKey, discountValue)
-//                kafkaTemplate.send("coupon-issued", eventId, event)
-//
-//                // 3) 사용자 메시지
-//                val message = "${discountValue}% 할인 쿠폰이 발급되었습니다."
 
                 val (couponKey, typeStr, discountStr) = result.split(":")
                 val discountValue = discountStr.toInt()
