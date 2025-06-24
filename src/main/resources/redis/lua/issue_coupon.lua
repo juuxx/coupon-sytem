@@ -12,7 +12,7 @@ if redis.call("HEXISTS", issuedKey, userId) == 1 then
 end
 
 -- 쿠폰 큐에서 꺼내기
-local couponKey = redis.call("RPOP", queueKey)
+local couponKey = redis.call("LPOP", queueKey)  --
 if not couponKey then
   return "SOLD_OUT"
 end

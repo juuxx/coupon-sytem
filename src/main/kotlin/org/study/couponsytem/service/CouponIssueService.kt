@@ -28,7 +28,7 @@ class CouponIssueService(
     fun issue(request: CouponIssueRequest): CouponIssueResponse {
         val eventId = request.eventId
         val userId = request.userId
-        val redisQueueKey = "couponQueue:$eventId"
+        val redisQueueKey = "couponPool:$eventId"
         val redisIssuedKey = "coupon:issued:$eventId"
 
         val result = redisTemplate.execute(
@@ -42,14 +42,20 @@ class CouponIssueService(
             "SOLD_OUT" -> CouponIssueResponse(false, "SOLD_OUT", null, "쿠폰이 모두 소진되었습니다.")
             null -> CouponIssueResponse(false, "ERROR", null, "쿠폰 발급 중 오류가 발생했습니다.")
             else -> {
-                val event = CouponIssuedEvent(
-                    eventId = eventId,
-                    userId = userId,
-                    couponKey = result
-                )
+                // ──────────────────────────
+                // 1) "couponKey:50" → 파싱
+                // ──────────────────────────
+                val (couponKey, discountStr) = result.split(":")
+                val discountRate = discountStr.toInt()
+
+                // 2) Kafka 발행
+                val event = CouponIssuedEvent(eventId, userId, couponKey, discountRate)
                 kafkaTemplate.send("coupon-issued", eventId, event)
 
-                CouponIssueResponse(true, null, result, "쿠폰 발급에 성공하였습니다.")
+                // 3) 사용자 메시지
+                val message = "${discountRate}% 할인 쿠폰이 발급되었습니다."
+
+                CouponIssueResponse(true, null, couponKey, message)
             }
         }
 

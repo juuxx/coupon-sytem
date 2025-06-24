@@ -17,11 +17,15 @@ data class Coupon(
     @JoinColumn(name = "group_id")
     val group: CouponGroup,
 
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    var discountType: DiscountType,
+
     @Column(name = "user_id")
     var userId: Long? = null,
 
     @Column(name = "discount_amount", nullable = false)
-    val discountAmount: Int,
+    var discountAmount: Int,
 
     @Column(name = "issued_flag", nullable = false)
     var issued: Boolean = false

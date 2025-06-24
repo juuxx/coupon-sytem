@@ -6,5 +6,6 @@ data class CouponIssuedEvent(
     val eventId: String,
     val userId: String,
     val couponKey: String,
+    val discountRate: Int,
     val issuedAt: String = LocalDateTime.now().toString()
 )
